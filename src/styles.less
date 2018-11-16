@@ -714,38 +714,14 @@
   }
   input[type=text],
   input[type=tel] {
-    position: relative;
-    font-size: 14px;
-    letter-spacing: .01rem;
-    z-index: 0;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-left: 48px;
-    margin-left: 0;
-    background: #FFFFFF;
-    border: 1px solid #CACACA;
-    border-radius: 5px;
-    line-height: 25px;
-    height: 35px;
-    width: 300px;
-    outline: none;
-    &.invalid-number {
-      border: 1px solid #d79f9f;
-      background-color: #FAF0F0;
-      border-left-color: #cacaca;
-      &:focus {
-        border: 1px solid #d79f9f;
-        border-left-color: #cacaca;
-        background-color: #FAF0F0;
-      }
-    }
+    padding-left: 65px;
   }
   .flag-dropdown {
     position: absolute;
     top: 0;
     bottom: 0;
     padding: 0;
-    background-color: #eaeaea;
+    background-color: #fff;
     border: 1px solid #cacaca;
     border-radius: 3px 0 0 3px;
     &.open-dropdown {
@@ -765,8 +741,9 @@
   }
   input[disabled] {
     &+.flag-dropdown {
+      background-color: #eee;
+      cursor: not-allowed;
       &:hover {
-        cursor: default;
         .selected-flag {
           background-color: transparent;
         }
@@ -776,9 +753,9 @@
   .selected-flag {
     z-index: 13;
     position: relative;
-    width: 38px;
+    width: 50px;
     height: 100%;
-    padding: 0 0 0 8px;
+    padding: 0 0 0 14px;
     border-radius: 3px 0 0 3px;
     .flag {
       position: absolute;
