@@ -22,6 +22,8 @@ class ReactPhoneInput extends React.Component {
 
     value: PropTypes.string,
     placeholder: PropTypes.string,
+    name: PropTypes.string,
+    required: PropTypes.bool,
     disabled: PropTypes.bool,
 
     containerStyle: PropTypes.object,
@@ -65,6 +67,8 @@ class ReactPhoneInput extends React.Component {
     value: '',
     placeholder: '+1 (702) 123-4567',
     flagsImagePath: './flags.png',
+    name: '',
+    required: false,
     disabled: false,
 
     containerStyle: {},
@@ -96,7 +100,7 @@ class ReactPhoneInput extends React.Component {
 
     onEnterKeyPress: () => {},
 
-    isModernBrowser: document.createElement ? (
+    isModernBrowser: typeof(document) !== 'undefined' && document.createElement ? (
       Boolean(document.createElement('input').setSelectionRange)
     ) : false,
 
@@ -114,13 +118,14 @@ class ReactPhoneInput extends React.Component {
     if (props.regions) filteredCountries = this.filterRegions(props.regions, filteredCountries);
 
     const onlyCountries = this.excludeCountries(
-      this.getOnlyCountries(props.onlyCountries, filteredCountries), props.excludeCountries);
+      this.getOnlyCountries(props.onlyCountries, filteredCountries), props.excludeCountries
+    ).sort((cA, cB) => this.getTranslatedName(cA).localeCompare(this.getTranslatedName(cB)));
 
     const preferredCountries = filter(filteredCountries, (country) => {
       return some(props.preferredCountries, (preferredCountry) => {
         return preferredCountry === country.iso2;
       });
-    });
+    }).sort((cA, cB) => this.getTranslatedName(cA).localeCompare(this.getTranslatedName(cB)));
 
     const inputNumber = props.value || '';
 
@@ -145,10 +150,10 @@ class ReactPhoneInput extends React.Component {
 
     let formattedNumber;
     formattedNumber = (inputNumber === '' && countryGuess === 0) ? '' :
-    this.formatNumber(
-      (props.disableCountryCode ? '' : dialCode) + inputNumber.replace(/\D/g, ''),
-      countryGuess.name ? countryGuess.format : undefined
-    );
+      this.formatNumber(
+        (props.disableCountryCode ? '' : dialCode) + inputNumber.replace(/\D/g, ''),
+        countryGuess.name ? countryGuess.format : undefined
+      );
 
     this.state = {
       formattedNumber,
@@ -161,7 +166,7 @@ class ReactPhoneInput extends React.Component {
       queryString: '',
       showDropdown: false,
       freezeSelection: false,
-      debouncedQueryStingSearcher: debounce(this.searchCountry, 100)
+      debouncedQueryStingSearcher: debounce(this.searchCountry, 300)
     };
   }
 
@@ -241,7 +246,7 @@ class ReactPhoneInput extends React.Component {
     }
     // don't include the preferred countries in search
     const probableCountries = filter(this.state.onlyCountries, (country) => {
-      return startsWith(country.name.toLowerCase(), queryString.toLowerCase());
+      return startsWith(this.getTranslatedName(country).toLowerCase(), queryString.toLowerCase());
     }, this);
     return probableCountries[0];
   });
@@ -453,10 +458,10 @@ class ReactPhoneInput extends React.Component {
     let freezeSelection = this.state.freezeSelection;
 
     if(!this.props.countryCodeEditable) {
-        const updatedInput = '+' + newSelectedCountry.dialCode;
-        if (e.target.value.length < updatedInput.length) {
-            return;
-        }
+      const updatedInput = '+' + newSelectedCountry.dialCode;
+      if (e.target.value.length < updatedInput.length) {
+        return;
+      }
     }
 
     //Does not exceed 15 digit phone number limit
@@ -582,10 +587,10 @@ class ReactPhoneInput extends React.Component {
   }
 
   searchCountry = () => {
-    const probableCandidate = this.getProbableCandidate(this.state.queryString) || this.state.onlyCountries[0];
-    const probableCandidateIndex = findIndex(this.state.onlyCountries, probableCandidate) + this.state.preferredCountries.length;
+    const probableCandidate = this.getProbableCandidate(this.state.queryString) || this.state.preferredCountries[0] || this.state.onlyCountries[0];
+    const probableCandidateIndex = findIndex(this.state.onlyCountries, probableCandidate);
 
-    this.scrollTo(this.getElement(probableCandidateIndex), true);
+    this.scrollTo(this.getElement(probableCandidateIndex + this.state.preferredCountries.length), true);
 
     this.setState({queryString: '', highlightCountryIndex: probableCandidateIndex});
   }
@@ -650,6 +655,8 @@ class ReactPhoneInput extends React.Component {
     }
   }
 
+  getTranslatedName = country => this.props.localization[country.name] !== undefined ? this.props.localization[country.name] : country.name
+
   getCountryDropdownList = () => {
     const { preferredCountries, onlyCountries, highlightCountryIndex, showDropdown } = this.state;
 
@@ -677,7 +684,7 @@ class ReactPhoneInput extends React.Component {
         >
           <div className={inputFlagClasses}/>
           <span className='country-name'>{
-              this.props.localization[country.name] != undefined ?
+            this.props.localization[country.name] != undefined ?
               this.props.localization[country.name] : country.name
           }</span>
           <span className='dial-code'>{'+' + country.dialCode}</span>
@@ -742,6 +749,8 @@ class ReactPhoneInput extends React.Component {
           placeholder={this.state.placeholder}
           disabled={this.props.disabled}
           type="tel"
+          required={this.props.required}
+          name={this.props.name}
           {...this.props.inputExtraProps}
         />
 
