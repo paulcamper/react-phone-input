@@ -7,11 +7,8 @@ import { trim, startsWith } from 'lodash/string';
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { document } from './global.js';
 
 import countryData from './country_data.js';
-
-import './styles.less';
 
 class ReactPhoneInput extends React.Component {
   static propTypes = {
@@ -171,6 +168,7 @@ class ReactPhoneInput extends React.Component {
   }
 
   componentDidMount() {
+    require('./styles.less')
     if (document.addEventListener) {
       document.addEventListener('mousedown', this.handleClickOutside);
       document.addEventListener('keydown', this.handleKeydown);
