@@ -46,7 +46,7 @@ class ReactPhoneInput extends React.Component {
     ]),
 
     inputExtraProps: PropTypes.object,
-    localization: PropTypes.object,
+    translateCountryName: PropTypes.func,
 
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
@@ -93,7 +93,6 @@ class ReactPhoneInput extends React.Component {
     regions: '',
 
     inputExtraProps: {},
-    localization: {},
 
     onEnterKeyPress: () => {},
 
@@ -653,7 +652,15 @@ class ReactPhoneInput extends React.Component {
     }
   }
 
-  getTranslatedName = country => this.props.localization[country.name] !== undefined ? this.props.localization[country.name] : country.name
+  getTranslatedName = country => {
+    const { translateCountryName } = this.props
+
+    if (typeof translateCountryName !== 'function') {
+      return country.name
+    }
+
+    return translateCountryName(country) || country.name
+  }
 
   getCountryDropdownList = () => {
     const { preferredCountries, onlyCountries, highlightCountryIndex, showDropdown } = this.state;
@@ -681,10 +688,7 @@ class ReactPhoneInput extends React.Component {
           onClick={() => this.handleFlagItemClick(country)}
         >
           <div className={inputFlagClasses}/>
-          <span className='country-name'>{
-            this.props.localization[country.name] != undefined ?
-              this.props.localization[country.name] : country.name
-          }</span>
+          <span className='country-name'>{this.getTranslatedName(country)}</span>
           <span className='dial-code'>{'+' + country.dialCode}</span>
         </li>
       );
@@ -764,7 +768,7 @@ class ReactPhoneInput extends React.Component {
             title={selectedCountry ? `${selectedCountry.name}: + ${selectedCountry.dialCode}` : ''}
           >
             <div className={inputFlagClasses}>
-              {!disableDropdown && <div className={arrowClasses}></div>}
+              {!disableDropdown && <div className={arrowClasses} />}
             </div>
           </div>
 
